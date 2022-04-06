@@ -1,0 +1,150 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CALongJump
+{
+    class Jump
+    {
+        public int Lenght { get; set;} //change to init, as init does not run on my version
+        public DateTime JumpDate { get; set; } //change to init, as init does not run on my version
+
+        public Jump (int lenght, DateTime jumpDate)
+        {
+            this.Lenght = lenght;
+            this.JumpDate = jumpDate;
+        }
+        
+        public override string ToString()
+        {
+            return "Jump lenght: " + Lenght + " Jump date: " + JumpDate;
+        }
+    }
+
+    //___________________________________________________________________________
+    public enum Gender { Male, Female}
+    class LongJumper
+    {
+        private string name;
+        private Gender gender;
+        public double pb;
+        public double sb;
+        public List<Jump> jumps;
+
+        public LongJumper(string name, Gender gender)
+        {
+            this.name = name;
+            this.gender = gender;
+            PB = 0;
+            SB = 0;
+            this.jumps = new List<Jump>();
+        }
+        public double PB
+        {
+            get =>  pb;
+            set
+            {
+                if (value > pb)
+                {
+                    pb = value;
+                }
+            }
+        }
+        public double SB
+        {
+            get => sb;
+            set
+            {
+                if (value > sb)
+                {
+                    sb = value;
+                }
+            }
+        }
+
+
+    
+
+
+        public string Name
+        {
+            get => name;
+            set 
+            {
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException("Name cannot be empty."); //unsure how to check for A-Z. I looked it up but do not know how to impletment Regex
+                }
+                else
+                {
+                    name = value;
+                }
+              
+            }
+        }
+        public void AddJump(Jump jump)
+        {
+             jumps.Add(jump); //add valiation on DateTime
+            //I relised too late that i needded to check every new jump against the SB and PB and if it was graeter to change it to the new value.
+            //DateTime lastRecordedJump;
+            //DateTime currenctJump;
+
+            //if(DateTime.currentJump > DateTime.lastRecordedJump)
+            //{
+            //    throw new ArgumentException("jump cannot be prior to last jump");
+            //}
+            //else
+            //{
+            //     jumps.Add(jump);
+
+            //}
+
+        }
+        public override string ToString()
+        {
+            return "The event is " + name + " and they are competing in " + gender;
+        }
+
+
+    }
+
+}
+
+using System;
+
+namespace CALongJump
+{
+    class Test
+    {
+        static void Main(string[] args)
+        {
+            LongJumper L1 = new LongJumper(name: "Paul Pogba", gender: Gender.Male);
+            Jump j1 = new Jump(lenght: 29, jumpDate: new DateTime(2019, 10, 05));
+            Jump j2 = new Jump(lenght: 31, jumpDate: new DateTime(2019, 10, 07));
+            Console.WriteLine(j1);
+
+            //var jumps = new List<doubles>() {6.7, 8.7, 9.1, 7.9}
+            L1.AddJump(j1);
+            L1.AddJump(j2);
+
+            Console.WriteLine(L1);
+            foreach (Jump j in L1.jumps)
+            {
+                Console.WriteLine(j);
+            }
+
+            //foreach(var number in grades)
+            //{
+            //    result += number;
+            //}
+            
+
+
+
+            //Hub hub = new Hub();
+            //hub.AddReading(new HygrometerReading(1, new DateTime(20, 10, 1), 50, 2));
+        }
+    }
+}
+
+
