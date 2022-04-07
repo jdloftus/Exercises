@@ -1,0 +1,127 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace Exercise1Final
+{
+    public enum TransactionType { Deposit, Withdrawal }
+    
+    public class AccountTransaction
+    {
+        private TransactionType type;
+        private double amount;
+
+        public AccountTransaction(TransactionType type, double amount)
+        {
+            this.type = type;
+            this.amount = amount;
+        }
+        public override string ToString()
+        {
+            return "Type: " + type + " amount: " + amount;
+        }
+    }
+    public abstract class BankAccount
+    {
+        private string accountNumber;
+        public string AccountNumber
+        {
+            get
+            {
+                return accountNumber;
+            }
+        }
+        private double balance { get; set; }
+        public double Balance
+        {
+            get
+            {
+                return balance;
+            }
+            set
+            {
+                balance = value;
+            }
+        }
+
+        public BankAccount(string accountNumber)
+        {         
+            this.accountNumber = accountNumber;
+            Balance = 0;
+        }
+        public abstract void MakeDeposit(double amount);
+        public abstract void MakeWithdrawal(double amount);
+    }
+
+
+    public class CurrentAccount : BankAccount
+    {
+        private double overdraftLimit { get; set; }
+        public List<AccountTransaction> transactions;
+
+        public CurrentAccount(string accountNumber, double overdraftlimit) : base(accountNumber)
+        {
+            this.overdraftLimit = overdraftlimit;
+            transactions = new List<AccountTransaction>();
+        }
+        public double OverdraftLimit
+        {
+            get
+            {
+                return overdraftLimit;
+            }
+        }
+
+        public override void MakeDeposit(double amount)
+        {
+                if(amount < 0)
+                {
+                    AccountTransaction at = new AccountTransaction(TransactionType.Deposit, amount);
+                    Balance += amount;
+                    transactions.Add(at);
+                }
+                else
+                {
+                    throw new ArgumentException("Amount needs to be positive");
+                }   
+        }
+
+        public override void MakeWithdrawal(double amount)
+        {
+            if (amount < (Balance + overdraftLimit))
+            {
+                AccountTransaction at = new AccountTransaction(TransactionType.Withdrawal, amount);
+                Balance -= amount;
+                transactions.Add(at);
+                if(Balance <= 0)
+                {
+                    Console.WriteLine("Funds Low");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Amount needs to be negative.");
+            }
+        }
+
+        public override string ToString()
+        {
+            String output;
+
+            output = "CurrentAccount:\t" + "number: " + AccountNumber + "Balance: " + Balance;
+            output += "\n Transaction History:\n";
+            for (int i = 0; i<transactions.Count; i++)
+            {
+                output += transactions.ToString() + "\n";
+            }
+
+            return output;
+        }
+    }
+}
+
+
+
