@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+
+namespace Exercise2Final
+{
+    public interface SerialisedXML
+    {
+        public void writeToXml(string filename);
+    }
+    public enum Priority { High, Normal, Low }
+    public class ToDoNote : SerialisedXML
+    {
+        public string Subject { get; set; }
+        public DateTime DueDate { get; set; }
+        public Priority Priority { get; set; }
+
+        public ToDoNote(string subject, DateTime duedate, Priority priority)
+        {
+            Subject = subject;
+            DueDate = duedate;
+            Priority = priority;
+        }
+        public override string ToString()
+        {
+            return "Subject: " + Subject + " Due Date: " + DueDate + " Priority: "  +Priority;
+        }
+
+        public  void writeToXml(string filename)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ToDoList : IEnumerable
+    {
+        public String Owner { get; set; }
+        List<ToDoNote> notes;
+
+        public ToDoList(string owner)
+        {
+            Owner = owner;
+            notes = new List<ToDoNote>();
+        }
+
+        public ToDoNote this[int i]
+        {
+            get
+            {
+                if((i>=0) && (i< notes.Count))
+                {
+                    return (ToDoNote) notes[i];
+                }
+                else
+                {
+                    throw new ArgumentException("Indexer is out of range");
+                }
+            }
+        }
+        //public Collection<ToDoNote> Notes
+        //{
+        //    get
+        //    {
+        //        return new Collection<ToDoNote>(notes);
+        //    }
+        //}
+
+        public IEnumerator GetEnumerator()
+        {
+            foreach(ToDoNote note in notes)
+            {
+                yield return note;
+            }
+        }
+        public void Add(ToDoNote note)
+        {
+            notes.Add(note);
+        }
+
+    }
+
+
+}
+
+
+In Line Test
+using System;
+
+namespace Exercise2Final
+{
+    class Program
+    {
+        static void Main()
+        {
+            ToDoList td = new ToDoList("Danny");
+            ToDoNote t1 = new ToDoNote("Shopping", DateTime.Now, Priority.High);
+            ToDoNote t2 = new ToDoNote("Pay Bills", new DateTime(2021, 12, 23), Priority.Normal);
+            ToDoNote t3 = new ToDoNote("Shopping", new DateTime(2021, 12, 25), Priority.High);
+            td.Add(t1);
+            td.Add(t2);
+            td.Add(t3);
+            Console.WriteLine(td);
+        }
+    }
+}
