@@ -1,0 +1,181 @@
+using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Exercise3Final
+{
+    public abstract class MediaFile1
+    {
+        private string fileName;
+
+        public string Filename
+        {
+            get
+            {
+                return fileName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException("Filename cannot be blank");
+                }
+                else
+                {
+                    fileName = value;
+                }
+            }
+        }
+        protected MediaFile1(string fileName)
+        {
+            Filename = fileName;
+        }
+
+        public override string ToString()
+        {
+            return "Filename: " + fileName;
+        }
+    }
+    public enum MusicGenre { Pop, Rock, Dance, Other }
+
+    public class MusicFile1 : MediaFile1
+    {
+        private string title;
+        private string artist;
+        private MusicGenre genre;
+
+        public string Title
+        {
+            get
+            {
+                return title;
+            }
+        }
+        public string Artist
+        {
+            get
+            {
+                return artist;
+            }
+        }
+        public MusicGenre Genre
+        {
+            get
+            {
+                return genre;
+            }
+        }
+
+        public MusicFile1(string filename, string title, string artist, MusicGenre genre) : base(filename)
+        {
+            if (String.IsNullOrEmpty(title))
+            {
+                throw new ArgumentException("Title cannot be blank");
+            }
+            else if (String.IsNullOrEmpty(artist))
+            {
+                throw new ArgumentException("Artist cannot be blank");
+            }
+
+            this.title = title;
+            this.artist = artist;
+            this.genre = genre;
+        }
+
+        public MusicFile1(string filename, string title, string artist) : this(filename, title, artist, MusicGenre.Other)
+        {
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + "Tittle: " + Title + " Artist: " + Artist + " Genre: " + Genre.ToString();
+        }
+    }
+
+    public class Playlist : IEnumerable
+    {
+        public String Name { get; set; }
+        List<MusicFile1> tracks;
+
+        public Playlist(string name)
+        {
+            this.Name = name;
+            tracks = new List<MusicFile1>();
+        }
+
+        public Collection<MusicFile1>Tracks
+        {
+            get
+            {
+                return new Collection<MusicFile1>(tracks);
+            }
+        }
+
+
+        public void AddTrack(MusicFile1 track)
+        {
+            if (tracks == null)
+            {
+                tracks.Add(track);
+            }
+            else
+            {
+                bool duplicate = false;
+                foreach(MusicFile1 t in tracks)
+                {
+                    if((track.Title == t.Title) && (track.Artist == t.Artist))
+                    {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if(duplicate)
+                {
+                    throw new ArgumentException("Track alreay in playlist");
+                }
+                else
+                {
+                    tracks.Add(track);
+                }
+            }
+        }
+        public IEnumerable<MusicFile1> this[MusicGenre genre]
+        {
+            get
+            {
+                var tracksForGenre = tracks.Where(t => t.Genre == genre);
+                return tracksForGenre;
+            }
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            foreach (MusicFile1 m in tracks)
+            {
+                yield return m;
+            }
+        }
+    }
+}
+
+//UNIT TEST
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void TestValidation1()
+        {
+            MusicFile1 track1 = new MusicFile1("t1.mp3", "", "Likki Li", MusicGenre.Dance);
+        }
+
+        public void Testadd()
+        {
+
+        }
+    }
+}
