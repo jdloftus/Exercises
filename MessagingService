@@ -1,0 +1,149 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+namespace MessagingCA
+{
+    public abstract class Message
+    {
+        public int ID { get; set; }
+        public string Content { get; set; }
+        public DateTime MessageDate { get; set; }
+        private DateTime date;
+        int nextAvailableID = 0;
+
+        public Message(string content)
+        {
+            this.ID = nextAvailableID;
+            nextAvailableID++;
+            MessageDate = DateTime.Now.Date;
+        }
+        public string Date
+        {
+            get
+            {
+                if (MessageDate.Date == DateTime.Now.Date)
+                {
+                    return MessageDate.ToString("hh: mm: ss");
+                }
+                else
+                {
+                    return MessageDate.ToString("MM - dd - yyyyy - hh: mm ; ss");
+                }
+            }
+        }
+    }
+
+    class SentMessage : Message
+    {
+        public override string ToString()
+        {
+            return ID + " " + Content + " " + MessageDate;
+        }
+
+
+        public SentMessage(string content):base(content)
+        {
+
+        }
+
+    }
+
+    class RecievedMessage : Message
+    {
+        public int stars { get; set; }
+        public string  content { get; set; }
+
+        public RecievedMessage(string content) : base(content)
+        {
+            this.stars = 0;
+            this.content = content;
+
+        }
+        public override string ToString()
+        {
+            return ID + " " + Content + " " + stars + " " + MessageDate;
+        }
+    }
+
+    class Chat : IEnumerable
+    {
+        private string user1Name;                   //sender
+        private string user2Name;                   //reciever
+        private List<Message> messages;
+
+        public Chat(string user1name, string user2name)
+        {
+            this.user1Name = user1name;
+            this.user2Name = user2name;
+            this.messages = new List<Message>();
+        }
+
+        public string User1Name
+        {
+            get
+            {
+                return user1Name;
+            }
+            set
+            {
+                if (Regex.IsMatch(value, @"^[a-zA-Z ] + $"))
+                {
+                    user1Name = value;
+                }
+                else
+                {
+                    throw new ArgumentException("The name must be alpabetic");
+                }           
+            }
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            foreach (Message message in messages)
+            {
+                yield return message;
+            }
+        }
+        public string User2Name
+        {
+            get
+            {
+                return user2Name;
+            }
+            set
+            {
+                if (Regex.IsMatch(value, @"^[a-zA-Z ] + $"))
+                {
+                    user2Name = value; ;
+                }
+                else
+                {
+                    throw new ArgumentException("The name must be alpabetic");
+                }
+            }
+        }
+        public void SendMessade(string content)
+        {
+            messages.Add( new SentMessage(content));
+        }
+        public void RecieveMessade(string content)
+        {
+            messages.Add(new RecievedMessage(content));
+        }
+
+        public void LikeMessage(int iD)
+        {
+           
+        }
+    }
+       
+        
+}
+
+
+//-------------------------------------
+
