@@ -1,0 +1,210 @@
+------ Pipeline
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CA2
+{
+    public interface ILogger
+    {
+        string Log { get; }
+    }
+    public enum Agent { Windows, Linux, MacOS}
+
+    public class PipeLine : ILogger
+    {
+        private string yaml;
+        public string Yaml
+        {
+            get
+            {
+                return yaml;
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException("Invlaid yaml.");
+                }
+                else
+                {
+
+                    yaml = value;
+                }
+            }
+        }
+        public Agent Agent { get; set; }
+        public bool CI { get; set; }
+        public DateTime? RunLast { get; set; }          // the ? meaning null if never ran
+        public bool? Pass { get; set; }
+        public string Badge
+        {
+            get
+            {
+                if(!Pass.HasValue)
+                {
+                    return "It has never ran.";
+                }
+                else
+                {
+                    if(Pass.HasValue)
+                    {
+                        return "It has succedded.";
+                    }
+                    else
+                    {
+                        return "It has failed.";
+                    }
+                }
+            }
+        }
+
+        private readonly List<string> log;
+
+        public string Log
+        {
+            get
+            {
+                StringBuilder output = new StringBuilder();
+                foreach (var s in log)
+                {
+                    output.Append(s + "\n");
+                }
+                return output.ToString();
+            }
+        }
+
+        public PipeLine(string yaml, Agent agent, bool ci) //first constructor  
+        {
+            
+                Yaml = yaml;
+                CI = ci;
+                Agent = agent;
+                RunLast = null;
+                Pass = null;
+                log = new();
+            
+        }
+
+        public PipeLine(string yaml, Agent agent) : this(yaml: yaml, agent: agent, ci:true)   //chaining the constructors 
+        {
+
+        }
+
+        public void Run()
+        {
+            log.Add("This is running on " + Agent);
+            RunLast = DateTime.Now;
+            Random r = new Random();
+            Pass = r.Next(0, 2) == 0;       //this will randomally chooose whether it will pass or fail - 50/50 chance i think
+
+            log[log.Count - 1] += $"{RunLast.Value}{Badge}";
+        }
+       
+
+
+    }
+}
+
+
+//----------------------------------REPO
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CA2
+{
+    public class Repo
+    {
+        public string Owner { get; set; }
+        public string RepoName { get; set; }
+        public PipeLine Pipeline { get; set; }                 //Pipeline object in a field - 
+        public Repo(string owner, string reponame, PipeLine pipeline)
+        {
+                Owner = owner;
+                RepoName = reponame;
+                this.Pipeline = pipeline;
+        }
+
+        public Uri URI
+        {
+            get => new Uri("htp://codehub.com" + Owner + RepoName);   //I had to leave out one of the ts in http or else it went weird
+        }
+
+        public void Commit(string commit)
+        {
+            if(commit.ToUpper() == Owner.ToUpper())
+            {
+                if(Pipeline != null && Pipeline.CI)   
+                {
+                    Pipeline.Run();
+                }
+            }
+            else
+            {
+                throw new ArgumentException("The input cannot commit.");
+            }
+        }
+    }
+}
+
+
+
+//---------------------------------------- UNIT TEST
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using CA2;
+using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+
+
+namespace TestCA2
+{
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]            // the first two tests work and run  
+        public void TestCreation1()
+        {
+            PipeLine p1 = new PipeLine("generic yaml", Agent.MacOS, true);
+            Repo r1 = new Repo("Daniel", "r1", p1);
+
+            PipeLine p2 = new PipeLine("generic yaml", Agent.MacOS, true);
+            Repo r2 = new Repo("Daniel", "r1", p1);
+            PipeLine p3 = new PipeLine("not generic", Agent.Linux, true);
+            Repo r3 = new Repo("Daniel", "r1", p1);
+
+            Assert.AreEqual(p1, p2);            //first test
+            Assert.AreEqual(r1, r2);             //second test
+            Assert.AreNotEqual(p1, p3);             //third test
+
+        }
+
+        [TestMethod]
+        public void TestCreation2()
+        {
+            PipeLine p1 = new PipeLine("generic yaml", Agent.MacOS, true);
+            Repo r1 = new Repo("Daniel", "r1", p1);
+
+            // I wanted to test the run methos but its hard to run the method when you cannot predict random output.
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]         
+        public void TestValidation() //third test
+        {
+            PipeLine p1 = new PipeLine(" ", Agent.MacOS, true);     //name cannot be blankspace this fail on validation
+            Repo r1 = new Repo("Daniel", "r1", p1);
+
+            
+        }
+
+    }
+}
+
