@@ -1,0 +1,180 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Exercise4Final
+{
+    public enum Gender { male, female}
+    public abstract  class SportsPlayer
+    {
+        public String Name { get; set; }
+        public int Age { get; set; }
+        public Gender Gender { get; set; }
+
+        public SportsPlayer(string name, int age, Gender gender)
+        {
+            Name = name;
+            Age = age;
+            Gender = gender;
+        }
+        public override string ToString()
+        {
+            return "Name: " + Name + " Age: " + Age + " Gender: " + Gender;
+        }
+    }
+
+    public enum Position { Goalkeeper, Defender, Midfilder, Striker}
+    public class SoccerPlayer : SportsPlayer
+    {
+        public Position Position{ get; set; }
+        public SoccerPlayer(string name, int age, Gender gender, Position position) : base(name, age, gender)
+        {
+            this.Position = position;
+        }
+
+        public SoccerPlayer() : this("", 0, Gender.male, Position.Defender)
+        {   
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + " Position: " + Position.ToString();
+        }
+    }
+
+    
+}
+
+
+//------------------------------------
+
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Exercise4Final
+{
+    class SoccerTeam : IEnumerable
+    {
+        public String TeamName { get; set; }
+        public Gender TeamGender { get; set; }
+        private int ageLimit;
+        private List<SoccerPlayer> players;
+
+        public SoccerTeam(string teamName, Gender teamGender, int ageLimit)
+        {
+            TeamName = teamName;
+            TeamGender = teamGender;
+            AgeLimit = ageLimit;
+            players = new List<SoccerPlayer>();
+        }
+
+        public int AgeLimit
+        {
+            get => ageLimit;
+            set
+            {
+                if (value < 5)
+                {
+                    throw new ArgumentException("Player is too young to play.");
+                }
+                else
+                {
+                    ageLimit = value;
+                }
+            }
+        }
+        public IEnumerator GetEnumerator()
+        {
+            foreach (SoccerPlayer player in players)
+            {
+                yield return player;
+            }
+        }
+
+        public SoccerPlayer this[String playerName]
+        {
+
+            get
+            {
+                //Soccerplayer player = null;
+                //Boolean found = false;
+
+                var query = players.FirstOrDefault(s => s.Name.ToUpper() == playerName.ToUpper());
+                if (query == null)
+                {
+                    Console.WriteLine("Not Found");
+                }
+                else
+                {
+                    Console.WriteLine(query);
+                }
+                return query;
+            }
+        }
+
+        public void AddPlayer(SoccerPlayer player)
+        {
+            if ((player.Age < ageLimit) && (player.Gender == TeamGender))
+            {
+                players.Add(player);
+            }
+            else
+            {
+                throw new ArgumentException("Player must be of the same gender as the team and under the age limit.");
+            }
+        }
+        public override string ToString()
+        {
+            return "Team Name: " + TeamName + " Team Gender: " + TeamGender.ToString() + " Team Age Limit: " + AgeLimit;
+        }
+
+    }
+}
+
+
+//--------------------------------------------------------------
+
+
+//Inline Test
+
+using System;
+
+namespace Exercise4Final
+{
+    class Program
+    {
+        static void Main()
+        {
+            SoccerPlayer player1 = new SoccerPlayer("Rio", 32, Gender.male, Position.Defender);
+            SoccerPlayer player2 = new SoccerPlayer("Becks", 30, Gender.male, Position.Midfilder);
+            SoccerPlayer player3 = new SoccerPlayer("Giggsey", 34, Gender.male, Position.Midfilder);
+            SoccerPlayer player4 = new SoccerPlayer("Cole", 33, Gender.male, Position.Striker);
+
+
+            SoccerTeam Team1 = new SoccerTeam("Man U", Gender.male, 45);
+
+            Console.WriteLine(Team1);
+
+            Team1.AddPlayer(player1);
+            Team1.AddPlayer(player2);
+            Team1.AddPlayer(player3);
+            Team1.AddPlayer(player4);
+            foreach (SoccerPlayer p in Team1)
+            {
+                Console.WriteLine(p);
+            }
+        }
+    }
+}
+
+//---------------------------------------------------
+
+
